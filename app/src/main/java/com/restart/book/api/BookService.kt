@@ -7,7 +7,7 @@ import retrofit2.http.Header
 import retrofit2.http.Query
 
 interface BookService {
-    @GET("/v1/search/book_adv")
+    @GET("/v1/search/book.json")
     fun getSearchBook(
         @Header("X-Naver-Client-Id") id: String,
         @Header("X-Naver-Client-Secret") pw: String,

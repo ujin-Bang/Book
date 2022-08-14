@@ -6,6 +6,6 @@ data class Book(
     val title: String,
     val image: String,
     val author: String,
-    @SerializedName("discount") val price: Int,
+    @SerializedName("discount") val price: String,
     val description: String
 )
