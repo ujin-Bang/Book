@@ -10,6 +10,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.restart.book.adapter.BookAdapter
+import com.restart.book.adapter.HistoryAdapter
 import com.restart.book.api.BookService
 import com.restart.book.databinding.ActivityMainBinding
 import com.restart.book.model.Book
@@ -41,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
         db = Room.databaseBuilder(
             applicationContext,
-            AppDatabase::class.java
+            AppDatabase::class.java,
         "BookSearchDB"
         ).build()
 
