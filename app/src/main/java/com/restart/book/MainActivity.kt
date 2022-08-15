@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
 
         val bookService = retrofit.create(BookService::class.java)
 
-        bookService.getSearchBook(id, pw, "Love").enqueue(object : Callback<SearchBooksDTO> {
+        bookService.getSearchBook(id, pw, "Love", 100).enqueue(object : Callback<SearchBooksDTO> {
             override fun onResponse(
                 call: Call<SearchBooksDTO>,
                 response: Response<SearchBooksDTO>

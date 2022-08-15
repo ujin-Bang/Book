@@ -11,7 +11,8 @@ interface BookService {
     fun getSearchBook(
         @Header("X-Naver-Client-Id") id: String,
         @Header("X-Naver-Client-Secret") pw: String,
-        @Query("query") keyword: String
+        @Query("query") keyword: String,
+        @Query("display") display: Int
         ): Call<SearchBooksDTO>
 
 }

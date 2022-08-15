@@ -5,8 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.restart.book.databinding.ItemBookBinding
 import com.restart.book.model.Book
+import java.text.DecimalFormat
 
 class BookAdapter: ListAdapter<Book, BookAdapter.BookItemViewHolder>(diffUtil) {
 
@@ -14,6 +16,16 @@ class BookAdapter: ListAdapter<Book, BookAdapter.BookItemViewHolder>(diffUtil) {
 
         fun bind(bookModel: Book){
             binding.titleTextView.text = bookModel.title
+            binding.authorTextView.text = bookModel.author
+            binding.descriptionTextView.text = bookModel.description
+
+            val priceInt = bookModel.price.toInt()
+            val commaPri = DecimalFormat("#,###")
+            val resultPri = commaPri.format(priceInt)
+            binding.priceTextView.text = "${resultPri}원"
+
+            Glide.with(binding.coverImageView.context).load(bookModel.image).into(binding.coverImageView)
+
         }
     }
 
