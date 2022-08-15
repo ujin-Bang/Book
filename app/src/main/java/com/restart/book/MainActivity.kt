@@ -4,10 +4,16 @@ import android.nfc.Tag
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
+import android.view.MotionEvent
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.Room
 import com.restart.book.adapter.BookAdapter
 import com.restart.book.api.BookService
 import com.restart.book.databinding.ActivityMainBinding
+import com.restart.book.model.Book
+import com.restart.book.model.History
 import com.restart.book.model.SearchBooksDTO
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,6 +25,11 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: BookAdapter
+    private lateinit var historyAdapter: HistoryAdapter
+
+    private lateinit var bookService: BookService
+
+    private lateinit var db: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,12 +39,18 @@ class MainActivity : AppCompatActivity() {
 
         initBookRecyclerView()
 
+        db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java
+        "BookSearchDB"
+        ).build()
+
         val retrofit = Retrofit.Builder()
             .baseUrl("https://openapi.naver.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        val bookService = retrofit.create(BookService::class.java)
+        bookService = retrofit.create(BookService::class.java)
 
         bookService.getSearchBook(id, pw, "Love", 100).enqueue(object : Callback<SearchBooksDTO> {
             override fun onResponse(
@@ -60,13 +77,69 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+
+        binding.searchEditText.setOnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == MotionEvent.ACTION_DOWN){
+                search(binding.searchEditText.text.toString())
+                return@setOnKeyListener true
+            }
+            return@setOnKeyListener false
+        }
     }
 
-    fun initBookRecyclerView(){
+    private fun search(keyword: String){
+
+        bookService.getSearchBook(id,pw,keyword,100).enqueue(object : Callback<SearchBooksDTO>{
+            override fun onResponse(
+                call: Call<SearchBooksDTO>,
+                response: Response<SearchBooksDTO>
+            ) {
+
+                saveSearchkeyword(keyword)
+                if (response.isSuccessful.not()){
+                    Log.e(TAG,response.message().toString())
+                    return
+                }
+                response.body()?.let { it ->
+                    Log.d(TAG,it.toString())
+
+                    it.booksList.forEach {
+                        Log.d(TAG, it.toString())
+                    }
+                    adapter.submitList(it.booksList) //리싸이클러뷰 갱신
+                }
+            }
+
+            override fun onFailure(call: Call<SearchBooksDTO>, t: Throwable) {
+
+            }
+
+        })
+
+    }
+
+    private fun initBookRecyclerView(){
 
         adapter = BookAdapter()
         binding.bookRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.bookRecyclerView.adapter = adapter
+    }
+
+    private fun showHistoryView(){
+        Thread{
+            val keywords = db.historyDao().getAll().reversed()
+        }
+        binding.historyRecyclerView.isVisible = true
+    }
+
+    private fun hideHistoryView(){
+        binding.historyRecyclerView.isVisible = false
+    }
+
+    private fun saveSearchkeyword(keyword: String){
+        Thread{
+            db.historyDao().insertHistory(History(null,keyword))
+        }.start()
     }
 
     companion object {
